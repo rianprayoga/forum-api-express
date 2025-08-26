@@ -2,52 +2,29 @@ import supertest from "supertest";
 import { web } from "../src/application/web";
 import { ThreadTestUtil, UserTestUtil } from "./test-utils";
 import {v4 as uuid} from "uuid";
+import { CreateUserRequest, UserResponse } from "../src/model/user-model";
 
 describe("POST /api/v1/threads", ()=> {
 
-    let token: string = "";
-    let userId: string;
+    let userJohnToken: UserResponse;
+    const userJohn:CreateUserRequest = {
+        username: "johndoe",
+        password: "secret",
+        name: "john doe"        
+    }
 
     beforeAll(async ()=> {
-
-            let res = await supertest(web)
-                .post("/api/v1/users")
-                .send({
-                    username: "johndoe",
-                    password: "secret",
-                    name: "john doe"
-                });
-
-            expect(res.status).toBe(200)
-            expect(res.body).toBeDefined()
-            expect(res.body.data.username).toBe("johndoe")
-            expect(res.body.data.name).toBe("john doe")
-            expect(res.body.data.id).toBeDefined()
-
-
-            res = await supertest(web)
-                .post("/api/v1/users/login")
-                .send({
-                    username: "johndoe",
-                    password: "secret"
-                });
-
-            expect(res.status).toBe(200)
-            expect(res.body).toBeDefined()
-            expect(res.body.data.username).toBe("johndoe")
-            expect(res.body.data.name).toBe("john doe")
-            expect(res.body.data.id).toBeDefined()
-            expect(res.body.data.token).toBeDefined()
-
-            token = res.body.data.token;
-            userId = res.body.data.id;
+        await UserTestUtil.createUser(userJohn)
+        userJohnToken = await UserTestUtil.loginUser({
+            username: userJohn.username,
+            password: userJohn.password
+        })
     })
 
     afterAll(async ()=> {
-        await ThreadTestUtil.deleteThreads(userId);
+        await ThreadTestUtil.deleteThreads(userJohnToken.id);
         await UserTestUtil.deleteUser();
     })
-
 
     it("should reject when token is invalid", async ()=> {
         const res = await supertest(web)
@@ -65,7 +42,7 @@ describe("POST /api/v1/threads", ()=> {
     it("should reject when body invalid", async ()=> {
         const res = await supertest(web)
         .post("/api/v1/threads")
-        .set({"X-API-TOKEN": token})
+        .set({"X-API-TOKEN": userJohnToken.token})
         .send({
             title: "",
             content: "",
@@ -78,7 +55,7 @@ describe("POST /api/v1/threads", ()=> {
     it("should create new thread", async ()=> {
         const res = await supertest(web)
         .post("/api/v1/threads")
-        .set({"X-API-TOKEN": token})
+        .set({"X-API-TOKEN": userJohnToken.token})
         .send({
             title: "test title",
             content: "this is the content",
@@ -96,7 +73,7 @@ describe("POST /api/v1/threads", ()=> {
     it("should get thread", async ()=> {
         const res = await supertest(web)
         .post("/api/v1/threads")
-        .set({"X-API-TOKEN": token})
+        .set({"X-API-TOKEN": userJohnToken.token})
         .send({
             title: "test title",
             content: "this is the content",
@@ -115,58 +92,38 @@ describe("POST /api/v1/threads", ()=> {
 
 describe("GET /api/v1/threads/:threadId", ()=> {
 
-    let token: string;
-    let userId: string;
     const thread = {
         title: "test title",
         content: "this is the content",
         id: ""
     }
 
+    let userJohnToken: UserResponse;
+    const userJohn:CreateUserRequest = {
+        username: "johndoe",
+        password: "secret",
+        name: "john doe"        
+    }
+
     beforeAll(async ()=> {
-
-            let res = await supertest(web)
-                .post("/api/v1/users")
-                .send({
-                    username: "johndoe",
-                    password: "secret",
-                    name: "john doe"
-                });
-
-            expect(res.status).toBe(200)
-            expect(res.body).toBeDefined()
-            expect(res.body.data.username).toBe("johndoe")
-            expect(res.body.data.name).toBe("john doe")
-            expect(res.body.data.id).toBeDefined()
-
-
-            res = await supertest(web)
-                .post("/api/v1/users/login")
-                .send({
-                    username: "johndoe",
-                    password: "secret"
-                });
-
-            expect(res.status).toBe(200)
-            expect(res.body).toBeDefined()
-            expect(res.body.data.username).toBe("johndoe")
-            expect(res.body.data.name).toBe("john doe")
-            expect(res.body.data.id).toBeDefined()
-            expect(res.body.data.token).toBeDefined()
-
-            token = res.body.data.token;
-            userId = res.body.data.id;
+        
+        await UserTestUtil.createUser(userJohn)
+        
+        userJohnToken = await UserTestUtil.loginUser({
+            username: userJohn.username,
+            password: userJohn.password,
+        })
     })
 
     afterAll(async ()=> {
-        await ThreadTestUtil.deleteThreads(userId);
+        await ThreadTestUtil.deleteThreads(userJohnToken.id);
         await UserTestUtil.deleteUser();
     })
 
     it("should create new thread", async ()=> {
         const res = await supertest(web)
         .post("/api/v1/threads")
-        .set({"X-API-TOKEN": token})
+        .set({"X-API-TOKEN": userJohnToken.token})
         .send(thread);
 
         expect(res.status).toBe(200)
@@ -207,58 +164,38 @@ describe("GET /api/v1/threads/:threadId", ()=> {
 
 describe("PUT /api/v1/threads/:threadId", ()=> {
 
-    let token: string;
-    let userId: string;
     const thread = {
         title: "test title",
         content: "this is the content",
         id: ""
     }
 
+    let userJohnToken: UserResponse;
+    const userJohn:CreateUserRequest = {
+        username: "johndoe",
+        password: "secret",
+        name: "john doe"        
+    }
+
     beforeAll(async ()=> {
-
-            let res = await supertest(web)
-                .post("/api/v1/users")
-                .send({
-                    username: "johndoe",
-                    password: "secret",
-                    name: "john doe"
-                });
-
-            expect(res.status).toBe(200)
-            expect(res.body).toBeDefined()
-            expect(res.body.data.username).toBe("johndoe")
-            expect(res.body.data.name).toBe("john doe")
-            expect(res.body.data.id).toBeDefined()
-
-
-            res = await supertest(web)
-                .post("/api/v1/users/login")
-                .send({
-                    username: "johndoe",
-                    password: "secret"
-                });
-
-            expect(res.status).toBe(200)
-            expect(res.body).toBeDefined()
-            expect(res.body.data.username).toBe("johndoe")
-            expect(res.body.data.name).toBe("john doe")
-            expect(res.body.data.id).toBeDefined()
-            expect(res.body.data.token).toBeDefined()
-
-            token = res.body.data.token;
-            userId = res.body.data.id;
+        
+        await UserTestUtil.createUser(userJohn)
+        
+        userJohnToken = await UserTestUtil.loginUser({
+            username: userJohn.username,
+            password: userJohn.password,
+        })
     })
 
     afterAll(async ()=> {
-        await ThreadTestUtil.deleteThreads(userId);
+        await ThreadTestUtil.deleteThreads(userJohnToken.id);
         await UserTestUtil.deleteUser();
     })
 
     it("should create new thread", async ()=> {
         const res = await supertest(web)
         .post("/api/v1/threads")
-        .set({"X-API-TOKEN": token})
+        .set({"X-API-TOKEN": userJohnToken.token})
         .send(thread);
 
         expect(res.status).toBe(200)
@@ -292,7 +229,7 @@ describe("PUT /api/v1/threads/:threadId", ()=> {
 
         const res = await supertest(web)
         .put(`/api/v1/threads/${thread.id}`)
-        .set({"X-API-TOKEN": token})
+        .set({"X-API-TOKEN": userJohnToken.token})
         .send(thread);
 
         expect(res.status).toBe(200)
@@ -308,7 +245,7 @@ describe("PUT /api/v1/threads/:threadId", ()=> {
 
         const res = await supertest(web)
         .put(`/api/v1/threads/${thread.id}`)
-        .set({"X-API-TOKEN": token})
+        .set({"X-API-TOKEN": userJohnToken.token})
         .send({
             title: "",
             content: ""
@@ -322,58 +259,38 @@ describe("PUT /api/v1/threads/:threadId", ()=> {
 
 describe("DELETE /api/v1/threads/:threadId", ()=> {
 
-    let token: string;
-    let userId: string;
     const thread = {
         title: "test title",
         content: "this is the content",
         id: ""
     }
 
+    let userJohnToken: UserResponse;
+    const userJohn:CreateUserRequest = {
+        username: "johndoe",
+        password: "secret",
+        name: "john doe"        
+    }
+
     beforeAll(async ()=> {
-
-            let res = await supertest(web)
-                .post("/api/v1/users")
-                .send({
-                    username: "johndoe",
-                    password: "secret",
-                    name: "john doe"
-                });
-
-            expect(res.status).toBe(200)
-            expect(res.body).toBeDefined()
-            expect(res.body.data.username).toBe("johndoe")
-            expect(res.body.data.name).toBe("john doe")
-            expect(res.body.data.id).toBeDefined()
-
-
-            res = await supertest(web)
-                .post("/api/v1/users/login")
-                .send({
-                    username: "johndoe",
-                    password: "secret"
-                });
-
-            expect(res.status).toBe(200)
-            expect(res.body).toBeDefined()
-            expect(res.body.data.username).toBe("johndoe")
-            expect(res.body.data.name).toBe("john doe")
-            expect(res.body.data.id).toBeDefined()
-            expect(res.body.data.token).toBeDefined()
-
-            token = res.body.data.token;
-            userId = res.body.data.id;
+        
+        await UserTestUtil.createUser(userJohn)
+        
+        userJohnToken = await UserTestUtil.loginUser({
+            username: userJohn.username,
+            password: userJohn.password,
+        })
     })
 
     afterAll(async ()=> {
-        await ThreadTestUtil.deleteThreads(userId);
+        await ThreadTestUtil.deleteThreads(userJohnToken.id);
         await UserTestUtil.deleteUser();
     })
 
     it("should create new thread", async ()=> {
         const res = await supertest(web)
         .post("/api/v1/threads")
-        .set({"X-API-TOKEN": token})
+        .set({"X-API-TOKEN": userJohnToken.token})
         .send(thread);
 
         expect(res.status).toBe(200)
@@ -404,7 +321,7 @@ describe("DELETE /api/v1/threads/:threadId", ()=> {
     it("should delete thread", async ()=> {
         const res = await supertest(web)
         .delete(`/api/v1/threads/${thread.id}`)
-        .set({"X-API-TOKEN": token});
+        .set({"X-API-TOKEN": userJohnToken.token});
 
         expect(res.status).toBe(200)
     })

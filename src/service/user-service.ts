@@ -19,7 +19,7 @@ export class UserService {
         });
 
         if(duplicatedUsername != 0){
-            throw new ResponseError(404, "Username taken.");
+            throw new ResponseError(400, "Username taken.");
         }
 
         reqisterRequest.password = await bcrypt.hash(reqisterRequest.password, 10);

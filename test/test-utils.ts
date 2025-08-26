@@ -1,4 +1,7 @@
+import supertest from "supertest";
 import { prismaClient } from "../src/application/database";
+import { CreateUserRequest, LoginUserRequest, UserResponse } from "../src/model/user-model";
+import { web } from "../src/application/web";
 
 export class UserTestUtil {
     static async deleteUser(username: string = "johndoe"){
@@ -7,6 +10,33 @@ export class UserTestUtil {
                 username: username
             }
         })
+    }
+
+    static async createUser(req:CreateUserRequest) {
+        const res = await supertest(web)
+                .post("/api/v1/users")
+                .send(req);
+
+        expect(res.status).toBe(200)
+        expect(res.body).toBeDefined()
+        expect(res.body.data.username).toBe(req.username)
+        expect(res.body.data.name).toBe(req.name)
+        expect(res.body.data.id).toBeDefined()
+    }
+
+    static async loginUser(req: LoginUserRequest): Promise<UserResponse>{
+        const res = await supertest(web)
+                .post("/api/v1/users/login")
+                .send(req);
+
+        expect(res.status).toBe(200)
+        expect(res.body).toBeDefined()
+        expect(res.body.data.username).toBe(req.username)
+        expect(res.body.data.name).toBeDefined()
+        expect(res.body.data.id).toBeDefined()
+        expect(res.body.data.token).toBeDefined()
+
+        return res.body.data as UserResponse
     }
 }
 
