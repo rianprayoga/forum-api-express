@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @db.Uuid() @default(uuid())
+  username String @db.VarChar(100)
+  password String @db.Text()
+  name String @db.VarChar(100)
+  token String? @db.Text()
+
+  threads Thread[]
+  comments Comment[]
+
+  @@unique([username])
+  @@map("users")
+}
+
+model Thread {
+  id String @id @db.Uuid() @default(uuid())
+  title String @db.VarChar(100)
+  content String @db.Text()
+  userId String @db.Uuid()
+  likeCount Int @db.Integer @default(0)
+  createdDate DateTime @default(now()) @db.Timestamptz()
+  updatedDate DateTime? @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id])
+  comments Comment[]
+
+  @@map("threads")
+}
+
+model Comment {
+  id String @id @default(uuid())
+  userId String @db.Uuid()
+  content String @db.Text
+  threadId String @db.Uuid()
+  createdDate DateTime @default(now()) @db.Timestamptz()
+  updatedDate DateTime? @db.Timestamptz()
+
+  thread Thread @relation(fields: [threadId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("comments")
+}

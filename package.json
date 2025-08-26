@@ -1,0 +1,39 @@
+{
+  "name": "rest-espress",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
+  },
+  "author": "rianprayoga",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "^6.14.0",
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-typescript": "^7.27.1",
+    "@jest/globals": "^30.0.5",
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
+    "@types/uuid": "^10.0.0",
+    "babel-jest": "^30.0.5",
+    "jest": "^30.0.5",
+    "prisma": "^6.14.0",
+    "supertest": "^7.1.4",
+    "typescript": "^5.9.2"
+  }
+}
