@@ -10,20 +10,23 @@ export const errorMiddleware = async(
     next: NextFunction) => {
 
         if(error instanceof ZodError){
+
+            const messages = error.issues.map(x=> x.message)
+
             res
-            .status(400)
-            .json({
-                errors: `Validation error : ${JSON.stringify(error)}`    
-            })
+                .status(400)
+                .json({
+                    errors: messages
+                })
         }else if (error instanceof ResponseError){
             res.status(error.status).json({
-                errors : error.message
+                errors : [error.message]
             })
         }else{
             logger.error(error)
             
             res.status(500).json({
-                errors : error.message
+                errors : [error.message]
             })
         }
 

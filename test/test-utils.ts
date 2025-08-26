@@ -19,9 +19,9 @@ export class UserTestUtil {
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe(req.username)
-        expect(res.body.data.name).toBe(req.name)
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(req.username)
+        expect(res.body.name).toBe(req.name)
+        expect(res.body.id).toBeDefined()
     }
 
     static async loginUser(req: LoginUserRequest): Promise<UserResponse>{
@@ -31,12 +31,12 @@ export class UserTestUtil {
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe(req.username)
-        expect(res.body.data.name).toBeDefined()
-        expect(res.body.data.id).toBeDefined()
-        expect(res.body.data.token).toBeDefined()
+        expect(res.body.username).toBe(req.username)
+        expect(res.body.name).toBeDefined()
+        expect(res.body.id).toBeDefined()
+        expect(res.body.token).toBeDefined()
 
-        return res.body.data as UserResponse
+        return res.body as UserResponse
     }
 }
 
@@ -47,5 +47,19 @@ export class ThreadTestUtil {
                 userId: userId
             }
         })
+    }
+}
+
+export class StringUtil {
+    
+    static makeString(length: number): string {
+        let result = "";
+        const characters = "abcdefghijklmnopqrstuvwxyz";
+        const charactersLength = 26;
+
+        for ( let i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
     }
 }

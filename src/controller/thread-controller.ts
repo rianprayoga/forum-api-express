@@ -11,10 +11,7 @@ export class ThreadController {
 
             const body:ThreadRequest = req.body as ThreadRequest;
             const response = await ThreadService.addThread(body, req.user!)
-            res.status(200).json({
-                data: response
-            })
-
+            res.status(200).json(response)
         }catch(e){
             next(e)
         }
@@ -26,9 +23,7 @@ export class ThreadController {
             const id = req.params.threadId!;
 
             const response = await ThreadService.getThread(id);
-            res.status(200).json({
-                data: response
-            })
+            res.status(200).json(response)
 
         }catch(e){
             next(e)
@@ -41,9 +36,7 @@ export class ThreadController {
             const body = req.body;
 
             const response = await ThreadService.updateThread(id, body, req.user!);
-            res.status(200).json({
-                data: response
-            })
+            res.status(200).json(response)
 
         }catch(e){
             next(e)

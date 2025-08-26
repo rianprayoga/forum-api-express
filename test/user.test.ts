@@ -1,12 +1,19 @@
 import supertest from "supertest"
 import {web} from "../src/application/web"
-import { UserTestUtil } from "./test-utils";
+import { StringUtil, UserTestUtil } from "./test-utils";
 import {v4 as uuid} from "uuid"
+import { CreateUserRequest } from "../src/model/user-model";
 
 describe("POST /v1/users", ()=> {
 
+    const request:CreateUserRequest = {
+        username: StringUtil.makeString(7),
+        name: "John doe",
+        password: "secret"
+    }
+
     afterEach(async ()=> {
-        await UserTestUtil.deleteUser()
+        await UserTestUtil.deleteUser(request.username)
     })
 
     it("should reject when request is invalid", async () => {
@@ -24,44 +31,42 @@ describe("POST /v1/users", ()=> {
     })
 
     it("should register new user", async () => {
-
+        
         const res = await supertest(web)
             .post("/api/v1/users")
-            .send({
-                username: "johndoe",
-                password: "secret",
-                name: "john doe"
-            });
+            .send(request);
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 })
 
 describe("POST /v1/users/login", ()=> {
 
+    const request:CreateUserRequest = {
+        username: StringUtil.makeString(7),
+        name: "John doe",
+        password: "secret"
+    }
+
     afterAll(async ()=> {
-        await UserTestUtil.deleteUser()
+        await UserTestUtil.deleteUser(request.username)
     })
 
     it("should register new user", async () => {
 
         const res = await supertest(web)
             .post("/api/v1/users")
-            .send({
-                username: "johndoe",
-                password: "secret",
-                name: "john doe"
-            });
+            .send(request);
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 
     it("should reject when username is wrong", async () => {
@@ -95,23 +100,29 @@ describe("POST /v1/users/login", ()=> {
         const res = await supertest(web)
             .post("/api/v1/users/login")
             .send({
-                username: "johndoe",
-                password: "secret"
+                username: request.username,
+                password: request.password
             });
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
-        expect(res.body.data.token).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
+        expect(res.body.token).toBeDefined()
     })
 })
 
 describe("GET /v1/users/current", ()=> {
 
+    const request:CreateUserRequest = {
+        username: StringUtil.makeString(7),
+        name: "John doe",
+        password: "secret"
+    }
+
     afterAll(async ()=> {
-        await UserTestUtil.deleteUser()
+        await UserTestUtil.deleteUser(request.username)
     })
 
     let token: string;
@@ -120,17 +131,10 @@ describe("GET /v1/users/current", ()=> {
 
         const res = await supertest(web)
             .post("/api/v1/users")
-            .send({
-                username: "johndoe",
-                password: "secret",
-                name: "john doe"
-            });
+            .send(request);
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
     })
 
     it("should login user", async () => {
@@ -138,18 +142,18 @@ describe("GET /v1/users/current", ()=> {
         const res = await supertest(web)
             .post("/api/v1/users/login")
             .send({
-                username: "johndoe",
-                password: "secret"
+                username: request.username,
+                password: request.password
             });
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
-        expect(res.body.data.token).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
+        expect(res.body.token).toBeDefined()
 
-        token = res.body.data.token;
+        token = res.body.token;
     })
 
     it("should get current user", async () => {
@@ -161,9 +165,9 @@ describe("GET /v1/users/current", ()=> {
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 
     it("should reject when token empty", async () => {
@@ -191,29 +195,26 @@ describe("GET /v1/users/current", ()=> {
 
 describe("PUT /v1/users/current", ()=> {
 
-    let username: string
+    const request:CreateUserRequest = {
+        username: StringUtil.makeString(7),
+        name: "John doe",
+        password: "secret"
+    }
+
     let token: string;
 
     afterAll(async ()=> {
-        await UserTestUtil.deleteUser(username)
+        await UserTestUtil.deleteUser(request.username)
     })
-
 
     it("should register new user", async () => {
 
         const res = await supertest(web)
             .post("/api/v1/users")
-            .send({
-                username: "johndoe",
-                password: "secret",
-                name: "john doe"
-            });
+            .send(request);
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
     })
 
     it("should login user", async () => {
@@ -221,18 +222,13 @@ describe("PUT /v1/users/current", ()=> {
         const res = await supertest(web)
             .post("/api/v1/users/login")
             .send({
-                username: "johndoe",
-                password: "secret"
+                username: request.username,
+                password: request.password
             });
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
-        expect(res.body.data.token).toBeDefined()
-
-        token = res.body.data.token;
+        token = res.body.token;
     })
 
     it("should get current user", async () => {
@@ -244,65 +240,57 @@ describe("PUT /v1/users/current", ()=> {
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 
     it("should change name", async () => {
 
+        request.name = StringUtil.makeString(7)
+
         const res = await supertest(web)
             .put("/api/v1/users/current")
             .set({"X-API-TOKEN": token})
-            .send({        
-                username: "johndoe",
-                password: "secret",
-                name: "john chena"
-            });
+            .send(request);
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john chena")
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 
     it("should change username", async () => {
 
+        request.username = StringUtil.makeString(7)
+
         const res = await supertest(web)
             .put("/api/v1/users/current")
             .set({"X-API-TOKEN": token})
-            .send({        
-                username: "johnchena",
-                password: "secret",
-                name: "john chena"
-            });
+            .send(request);
             
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johnchena")
-        expect(res.body.data.name).toBe("john chena")
-        expect(res.body.data.id).toBeDefined()
-
-        username = res.body.data.username
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 
     it("should change password", async () => {
 
+        request.password = StringUtil.makeString(7)
+
         const res = await supertest(web)
             .put("/api/v1/users/current")
             .set({"X-API-TOKEN": token})
-            .send({        
-                username: "johnchena",
-                password: "secret123",
-                name: "john chena"
-            });
+            .send(request);
             
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johnchena")
-        expect(res.body.data.name).toBe("john chena")
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 
     it("should fail get-current-user after changing password", async () => {
@@ -321,25 +309,30 @@ describe("PUT /v1/users/current", ()=> {
         const res = await supertest(web)
             .post("/api/v1/users/login")
             .send({
-                username: "johnchena",
-                password: "secret123"
+                username: request.username,
+                password: request.password
             });
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johnchena")
-        expect(res.body.data.name).toBe("john chena")
-        expect(res.body.data.id).toBeDefined()
-        expect(res.body.data.token).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
+        expect(res.body.token).toBeDefined()
     })
 })
 
 describe("POST /v1/users/logout", ()=> {
 
+    const request:CreateUserRequest = {
+        username: StringUtil.makeString(7),
+        name: "John doe",
+        password: "secret"
+    }
     let token: string;
 
     afterAll(async ()=> {
-        await UserTestUtil.deleteUser()
+        await UserTestUtil.deleteUser(request.username)
     })
 
 
@@ -347,17 +340,10 @@ describe("POST /v1/users/logout", ()=> {
 
         const res = await supertest(web)
             .post("/api/v1/users")
-            .send({
-                username: "johndoe",
-                password: "secret",
-                name: "john doe"
-            });
+            .send(request);
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
     })
 
     it("should login user", async () => {
@@ -365,18 +351,18 @@ describe("POST /v1/users/logout", ()=> {
         const res = await supertest(web)
             .post("/api/v1/users/login")
             .send({
-                username: "johndoe",
-                password: "secret"
+                username: request.username,
+                password: request.password
             });
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
-        expect(res.body.data.token).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
+        expect(res.body.token).toBeDefined()
 
-        token = res.body.data.token;
+        token = res.body.token;
     })
 
     it("should get current user", async () => {
@@ -388,9 +374,9 @@ describe("POST /v1/users/logout", ()=> {
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 
     it("should logut user", async () => {
@@ -402,9 +388,9 @@ describe("POST /v1/users/logout", ()=> {
 
         expect(res.status).toBe(200)
         expect(res.body).toBeDefined()
-        expect(res.body.data.username).toBe("johndoe")
-        expect(res.body.data.name).toBe("john doe")
-        expect(res.body.data.id).toBeDefined()
+        expect(res.body.username).toBe(request.username)
+        expect(res.body.name).toBe(request.name)
+        expect(res.body.id).toBeDefined()
     })
 
     it("should fail get-current-user after logout", async () => {
