@@ -4,6 +4,8 @@ import { ThreadValidation } from "../validation/thread-validation";
 import { Validation } from "../validation/validation";
 import { prismaClient } from "../application/database";
 import { ResponseError } from "../error/error-response";
+import { PageData, PageRequest } from "../model/pageable";
+import { da } from "zod/v4/locales/index.cjs";
 
 export class ThreadService {
 
@@ -77,5 +79,32 @@ export class ThreadService {
         })
     }
 
+    static async getThreads(req: PageRequest): Promise<PageData<ThreadResponse>> {
+
+        const threads = await prismaClient.thread.findMany({
+            take: req.pageSize,
+            skip: req.pageSize * req.pageNumber,
+            orderBy: {
+                "createdDate": "asc"
+            }
+        })
+
+        const totalData = await prismaClient.thread.count()
+
+        const data = threads.map( t => {
+            const res = toThreadResponse(t)
+            res.like = t.likeCount === null? 0: t.likeCount
+            return res;
+        });
+
+        return {
+            data: data,
+            pageInfo: {
+                pageNumber: req.pageNumber,
+                pageSize : req.pageSize,
+                totalPage : Math.ceil(totalData/req.pageSize)
+            }
+        }
+    }
 
 }

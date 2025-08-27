@@ -4,7 +4,7 @@ import { CreateUserRequest, LoginUserRequest, UserResponse } from "../src/model/
 import { web } from "../src/application/web";
 
 export class UserTestUtil {
-    static async deleteUser(username: string = "johndoe"){
+    static async deleteUser(username: string){
         await prismaClient.user.deleteMany({
             where: {
                 username: username

@@ -11,3 +11,4 @@ publicRouter.post("/api/v1/users/login", UserController.login);
 
 // threads
 publicRouter.get("/api/v1/threads/:threadId", ThreadController.get);
+publicRouter.get("/api/v1/threads", ThreadController.getPage);

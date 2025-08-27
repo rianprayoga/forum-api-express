@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { UserRequest } from "../type/user-request";
 import { ThreadRequest } from "../model/thread-model";
 import { ThreadService } from "../service/thread-service";
+import { PageRequest } from "../model/pageable";
+import { logger } from "../application/logging";
 
 export class ThreadController {
 
@@ -53,6 +55,19 @@ export class ThreadController {
         }
     }
 
+    static async getPage(req: Request, res: Response, next: NextFunction){
+        try{
+            
+            const pageRequest: PageRequest = {
+                pageNumber: req.query.pageNumber ? Number(req.query.pageNumber): 0,
+                pageSize: req.query.pageSize ? Number(req.query.pageSize): 10
+            }
 
+            const response = await ThreadService.getThreads(pageRequest)
+            res.status(200).json(response)
+        }catch(e){
+            next(e)
+        }
+    }
 
 }

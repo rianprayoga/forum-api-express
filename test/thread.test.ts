@@ -117,7 +117,7 @@ describe("GET /api/v1/threads/:threadId", ()=> {
 
     afterAll(async ()=> {
         await ThreadTestUtil.deleteThreads(firstUserToken.id);
-        await UserTestUtil.deleteUser();
+        await UserTestUtil.deleteUser(firstUserToken.username);
     })
 
     it("should create new thread", async ()=> {
@@ -162,6 +162,126 @@ describe("GET /api/v1/threads/:threadId", ()=> {
 
 })
 
+describe("GET /api/v1/threads", ()=> {
+
+    let firstUserToken: UserResponse;
+    const firstUser:CreateUserRequest = {
+        username: StringUtil.makeString(7),
+        password: "secret",
+        name: "john doe"        
+    }
+
+    beforeAll(async ()=> {
+        
+        await UserTestUtil.createUser(firstUser)
+        
+        firstUserToken = await UserTestUtil.loginUser({
+            username: firstUser.username,
+            password: firstUser.password,
+        })
+    })
+
+    afterAll(async ()=> {
+        await ThreadTestUtil.deleteThreads(firstUserToken.id);
+        await UserTestUtil.deleteUser(firstUserToken.username);
+    })
+
+    it("should create 1st thread", async ()=> {
+        const res = await supertest(web)
+        .post("/api/v1/threads")
+        .set({"X-API-TOKEN": firstUserToken.token})
+        .send({
+            title: StringUtil.makeString(10),
+            content: StringUtil.makeString(20),
+        });
+
+        expect(res.status).toBe(200)
+        expect(res.body).toBeDefined()
+    })
+
+    it("should create 2nd thread", async ()=> {
+        const res = await supertest(web)
+        .post("/api/v1/threads")
+        .set({"X-API-TOKEN": firstUserToken.token})
+        .send({
+            title: StringUtil.makeString(10),
+            content: StringUtil.makeString(20),
+        });
+
+        expect(res.status).toBe(200)
+        expect(res.body).toBeDefined()
+    })
+
+    it("should create 3rd thread", async ()=> {
+        const res = await supertest(web)
+        .post("/api/v1/threads")
+        .set({"X-API-TOKEN": firstUserToken.token})
+        .send({
+            title: StringUtil.makeString(10),
+            content: StringUtil.makeString(20),
+        });
+
+        expect(res.status).toBe(200)
+        expect(res.body).toBeDefined()
+    })
+
+    it("should create 4th thread", async ()=> {
+        const res = await supertest(web)
+        .post("/api/v1/threads")
+        .set({"X-API-TOKEN": firstUserToken.token})
+        .send({
+            title: StringUtil.makeString(10),
+            content: StringUtil.makeString(20),
+        });
+
+        expect(res.status).toBe(200)
+        expect(res.body).toBeDefined()
+    })
+
+    it("should create 5th thread", async ()=> {
+        const res = await supertest(web)
+        .post("/api/v1/threads")
+        .set({"X-API-TOKEN": firstUserToken.token})
+        .send({
+            title: StringUtil.makeString(10),
+            content: StringUtil.makeString(20),
+        });
+
+        expect(res.status).toBe(200)
+        expect(res.body).toBeDefined()
+    })
+
+    it("should get pageable thread with default param", async ()=> {
+        const res = await supertest(web)
+        .get("/api/v1/threads");
+
+        expect(res.status).toBe(200);
+        expect(res.body).toBeDefined();
+        expect(res.body.data).toHaveLength(5);
+        expect(res.body.pageInfo.pageNumber).toBe(0);
+        expect(res.body.pageInfo.pageSize).toBe(10);
+        expect(res.body.pageInfo.totalPage).toBe(1);
+    })
+
+    it("should get pageable thread with param", async ()=> {
+        const res = await supertest(web)
+        .get("/api/v1/threads")
+        .query({
+            pageNumber: 1,
+            pageSize: 3
+        });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toBeDefined();
+        expect(res.body.data).toHaveLength(2);
+        expect(res.body.pageInfo.pageNumber).toBe(1);
+        expect(res.body.pageInfo.pageSize).toBe(3);
+        expect(res.body.pageInfo.totalPage).toBe(2);
+    })
+
+
+})
+
 describe("PUT /api/v1/threads/:threadId", ()=> {
 
     const thread = {
@@ -189,7 +309,7 @@ describe("PUT /api/v1/threads/:threadId", ()=> {
 
     afterAll(async ()=> {
         await ThreadTestUtil.deleteThreads(firstUserToken.id);
-        await UserTestUtil.deleteUser();
+        await UserTestUtil.deleteUser(firstUserToken.username);
     })
 
     it("should create new thread", async ()=> {
@@ -284,7 +404,7 @@ describe("DELETE /api/v1/threads/:threadId", ()=> {
 
     afterAll(async ()=> {
         await ThreadTestUtil.deleteThreads(firstUserToken.id);
-        await UserTestUtil.deleteUser();
+        await UserTestUtil.deleteUser(firstUserToken.username);
     })
 
     it("should create new thread", async ()=> {
