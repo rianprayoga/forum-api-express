@@ -3,7 +3,6 @@ import { UserRequest } from "../type/user-request";
 import { ThreadRequest } from "../model/thread-model";
 import { ThreadService } from "../service/thread-service";
 import { PageRequest } from "../model/pageable";
-import { logger } from "../application/logging";
 
 export class ThreadController {
 
